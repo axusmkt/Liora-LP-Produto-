@@ -35,7 +35,7 @@ const getWhatsAppLink = (message: string) => {
 };
 
 // Checkout Configuration
-const CHECKOUT_SINGLE = "https://perfumaria-liora.pay.yampi.com.br/r/93ZL576JZQ";
+const CHECKOUT_SINGLE = "https://perfumaria-liora.pay.yampi.com.br/r/CZYZYUQGN0";
 const CHECKOUT_DUO = "https://perfumaria-liora.pay.yampi.com.br/r/IBEVB5W13N";
 const CHECKOUT_TRIO = "https://perfumaria-liora.pay.yampi.com.br/r/A2ZHOL8A36";
 
@@ -199,13 +199,14 @@ interface VideoData {
   portrait: boolean;
 }
 
-const VideoCard = memo(({ vid }: { vid: VideoData; [key: string]: any }) => {
+const VideoCard = ({ vid, index }: any) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const videoUrl = `${vid.url}&autoplay=1&title=0&byline=0&portrait=0&badge=0`;
+  const videoUrl = `${vid.url}&autoplay=1&title=0&byline=0&portrait=0&badge=0&player_id=vimeo_${index}`;
 
   return (
     <div className="bg-white p-2 rounded-[24px] shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-brand-primary/5 group transition-all duration-700 hover:shadow-[0_20px_50px_rgba(197,160,89,0.1)] will-change-transform">
       <div 
+        id={`video-container-${index}`}
         className="relative rounded-[16px] overflow-hidden aspect-[9/16] bg-brand-primary cursor-pointer" 
         onClick={() => setIsPlaying(true)}
       >
@@ -241,7 +242,7 @@ const VideoCard = memo(({ vid }: { vid: VideoData; [key: string]: any }) => {
       </div>
     </div>
   );
-});
+};
 
 const TestimonialsVideo = () => {
   const videos = [
@@ -264,7 +265,7 @@ const TestimonialsVideo = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {videos.map((vid, i) => (
-            <VideoCard key={i} vid={vid} />
+            <VideoCard key={i} vid={vid} index={i} />
           ))}
         </div>
       </div>
@@ -881,14 +882,20 @@ const Footer = () => (
   </footer>
 );
 
+// Tracking configuration
+if (typeof window !== 'undefined') {
+  window.pixelId = "69e1626d526b1625aa84b749";
+  // Some versions of the tracker expect utmifyConfig
+  (window as any).utmifyConfig = {
+    pixelId: "69e1626d526b1625aa84b749"
+  };
+}
+
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Initialize UTMify Tracking
   useEffect(() => {
-    // Set Pixel ID
-    window.pixelId = "69e1626d526b1625aa84b749";
-
     // Inject Script if not present
     if (!document.getElementById('utmify-pixel-script')) {
       const script = document.createElement("script");
@@ -901,13 +908,14 @@ export default function App() {
   }, []);
 
   const trackIC = () => {
-    if (window.utmify && typeof window.utmify.track === 'function') {
-      window.utmify.track('InitiateCheckout');
-    } else {
-      // Fallback: try to push to dataLayer or just a custom event if utmify isn't ready
-      // UTMify's pixel.js usually auto-tracks clicks to common checkouts, 
-      // but manual call is safer.
-      console.log('UTMify not initialized, but IC triggered');
+    try {
+      if (typeof window !== 'undefined' && window.utmify && typeof window.utmify.track === 'function') {
+        window.utmify.track('InitiateCheckout');
+      } else {
+        console.log('UTMify not initialized or ready, but IC triggered');
+      }
+    } catch (e) {
+      console.warn('Tracking error suppressed:', e);
     }
   };
 
