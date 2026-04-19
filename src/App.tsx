@@ -30,7 +30,8 @@ declare global {
 const WHATSAPP_NUMBER = "5598920020157";
 
 const getWhatsAppLink = (message: string) => {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  const finalMessage = `${message} Vim pelo site.`;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(finalMessage)}`;
 };
 
 // Checkout Configuration
@@ -408,7 +409,7 @@ const Products = ({ onProductClick }: { onProductClick: (p: Product) => void }) 
       oldPrice: "119,90",
       image: "https://i.ibb.co/5xJ9C6cw/1-Perfume.png",
       description: "Uma obra-prima da perfumaria de nicho. Este bouquet floral abre com a vivacidade do ruibarbo e lichia, evoluindo para uma rosa turca aveludada que exala realeza e um magnetismo irresistível.",
-      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/93ZL576JZQ"
+      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/CZYZYUQGN0"
     },
     { 
       name: "Inspiração Libre Yves Saint Laurent | Miniatura", 
@@ -431,8 +432,8 @@ const Products = ({ onProductClick }: { onProductClick: (p: Product) => void }) 
       price: "79,90", 
       oldPrice: "94,90",
       image: "https://i.ibb.co/tTTpg3rK/Passione-png.png",
-      description: "Um hino à paixão vibrante. Com notas de néctar de groselha preta e acordes florais de rosa e jasmim, é uma fragrância radiante e audaciosa, ideal para quem vive com intensidade e elegância.",
-      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/V2U67Y9KA0"
+      description: "Um hino à paixão vibrante. Com notas de néctar de groselha preta e acordes floral de rosa e jasmim, é uma fragrância radiante e audaciosa, ideal para quem vive com intensidade e elegância.",
+      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/7BJU03QE5R"
     },
     { 
       name: "Inspiração Miss Dior EDP | Miniatura", 
@@ -448,7 +449,7 @@ const Products = ({ onProductClick }: { onProductClick: (p: Product) => void }) 
       oldPrice: "97,90",
       image: "https://i.ibb.co/bMC2Jm7p/JPG-Classique.png",
       description: "A essência icônica da feminilidade. Uma combinação inesquecível de gengibre, flor de laranjeira e baunilha, que cria um rastro afrodisíaco e atemporal, celebrando a arte da sedução.",
-      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/93ZL576JZQ"
+      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/JDFNFQ6YOW"
     }
   ];
 
@@ -463,8 +464,7 @@ const Products = ({ onProductClick }: { onProductClick: (p: Product) => void }) 
         {perfumes.map((perfume, i) => (
           <div 
             key={i} 
-            onClick={() => onProductClick(perfume)}
-            className="group bg-white rounded-[40px] overflow-hidden border border-brand-primary/5 hover:border-gold/30 hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 cursor-pointer flex flex-col"
+            className="group bg-white rounded-[40px] overflow-hidden border border-brand-primary/5 hover:border-gold/30 hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 flex flex-col"
           >
             <div className="h-[320px] bg-white overflow-hidden relative flex items-center justify-center p-12 transition-all duration-700">
               <div className="absolute inset-0 bg-brand-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
@@ -504,8 +504,22 @@ const Products = ({ onProductClick }: { onProductClick: (p: Product) => void }) 
                      {[1,2,3,4,5].map(j => <Star key={j} className="w-3.5 h-3.5 fill-gold text-gold" />)}
                   </div>
                 </div>
-                <div className="btn-cta bg-brand-primary text-white group-hover:bg-gold group-hover:text-white transition-all shadow-lg !min-h-[48px] text-xs">
-                  VER DETALHES
+                
+                <div className="flex flex-col gap-3">
+                  <a 
+                    href={perfume.checkoutLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-cta bg-gold text-white hover:bg-gold-light transition-all shadow-lg !h-[56px] text-[10px] w-full"
+                  >
+                    COMPRAR AGORA
+                  </a>
+                  <button 
+                    onClick={() => onProductClick(perfume)}
+                    className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary/40 hover:text-gold transition-colors py-2"
+                  >
+                    Ver detalhes do aroma
+                  </button>
                 </div>
               </div>
             </div>
