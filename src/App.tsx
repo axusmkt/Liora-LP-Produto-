@@ -16,6 +16,16 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect, memo } from "react";
 
+// UTMify Tracking Types
+declare global {
+  interface Window {
+    pixelId?: string;
+    utmify?: {
+      track: (event: string, properties?: any) => void;
+    };
+  }
+}
+
 // WhatsApp Configuration
 const WHATSAPP_NUMBER = "5598920020157";
 
@@ -71,12 +81,12 @@ const Hero = () => {
         <div className="inline-block px-[5px] py-2 bg-brand-accent rounded-full text-[8px] italic font-black uppercase tracking-[0.3em] text-gold border border-gold/10 mb-[10px] w-[317px]">
           Miniaturas — Brand Collection 25ML
         </div>
-        <h1 className="serif text-5xl md:text-8xl font-light leading-[1.1] text-balance max-w-5xl mx-auto">
+        <h1 className="serif text-5xl md:text-[60px] font-light leading-[1.1] text-balance max-w-5xl mx-auto">
           Sinta o <span className="italic font-medium text-gold text-balance">luxo</span> em cada rastro
         </h1>
       </motion.div>
       
-      <div className="w-full max-w-2xl mb-20 px-4 sm:px-0">
+      <div className="w-full max-w-2xl mb-[10px] px-4 sm:px-0">
         <div className="relative group">
           <div className="absolute -inset-4 bg-gold/5 rounded-[40px] blur-2xl group-hover:bg-gold/10 transition-colors"></div>
           
@@ -135,9 +145,9 @@ const Hero = () => {
         <div className="w-full max-w-[340px] md:max-w-md space-y-4">
           <button 
             onClick={scrollToOffers}
-            className="btn-cta bg-gold text-white hover:bg-gold-light w-full px-[15px]"
+            className="btn-cta bg-gold text-white hover:bg-gold-light w-full"
           >
-            QUERO ESSA FRAGRÂNCIA AGORA
+            VER PROMOÇÕES COMPLETAS
           </button>
           <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-brand-primary/40">
             Receba hoje em São Luís com frete grátis
@@ -270,7 +280,7 @@ interface Product {
   checkoutLink: string;
 }
 
-const ProductModal = ({ product, isOpen, onClose }: { product: Product | null, isOpen: boolean, onClose: () => void }) => {
+const ProductModal = ({ product, isOpen, onClose, trackIC }: { product: Product | null, isOpen: boolean, onClose: () => void, trackIC: () => void }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -280,114 +290,108 @@ const ProductModal = ({ product, isOpen, onClose }: { product: Product | null, i
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
-  if (!isOpen || !product) return null;
+  if (!product) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8 overflow-y-auto">
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+    <div className={`fixed inset-0 z-[100] overflow-y-auto p-4 md:p-10 transition-all duration-500 ${isOpen ? 'opacity-100 flex justify-center' : 'opacity-0 pointer-events-none'}`}>
+      <div 
+        className="fixed inset-0 bg-brand-primary/95 backdrop-blur-2xl" 
         onClick={onClose}
-        className="fixed inset-0 bg-brand-primary/80 backdrop-blur-md"
       />
       
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 40 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-4xl bg-white rounded-[32px] md:rounded-[56px] shadow-[0_40px_100px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col md:flex-row my-auto pointer-events-auto"
+        initial={{ opacity: 0, y: 50, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className="relative w-full max-w-5xl bg-white overflow-hidden flex flex-col md:flex-row my-auto pointer-events-auto rounded-[40px] md:rounded-[64px] min-h-[min-content]"
       >
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 z-50 p-3 bg-brand-accent/80 backdrop-blur-md rounded-full text-brand-primary/40 hover:text-gold transition-all shadow-sm"
+          className="absolute top-8 right-8 z-50 p-4 bg-brand-accent rounded-full text-brand-primary/40 hover:text-gold transition-all shadow-sm"
         >
           <X className="w-5 h-5 md:w-6 h-6" />
         </button>
 
         {/* Product Image Side */}
-        <div className="w-full md:w-[45%] bg-white p-10 md:p-16 flex items-center justify-center relative min-h-[400px] border-b md:border-b-0 md:border-r border-brand-primary/5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.03)_0%,transparent_70%)] pointer-events-none"></div>
-          <div className="absolute top-8 left-8 flex flex-col gap-3 z-20">
-            <div className="bg-gold text-white px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-lg">
-              25ml
+        <div className="w-full md:w-1/2 bg-white p-12 md:p-20 flex items-center justify-center relative border-b md:border-b-0 md:border-r border-brand-primary/5">
+          <div className="absolute top-10 left-10 flex flex-col gap-3 z-20">
+            <div className="bg-brand-primary text-white px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-lg">
+              BRAND COLLECTION — 25ML
             </div>
           </div>
           
           <img 
             src={product.image} 
             alt={product.name}
-            className="w-full h-full max-w-[85%] max-h-[400px] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-transform duration-700 hover:scale-105"
+            className="w-full h-full max-h-[450px] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.12)] transition-transform duration-1000 hover:scale-105"
             referrerPolicy="no-referrer"
           />
         </div>
 
         {/* Content Side */}
-        <div className="w-full md:w-[55%] p-10 md:p-14 space-y-10">
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="flex gap-1.5">
-                {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-gold text-gold" />)}
-              </div>
-              <span className="text-[11px] font-black text-gold/60 uppercase tracking-[0.2em] border-l border-gold/20 pl-4">Muito elogiado</span>
-            </div>
-            <h2 className="serif text-4xl md:text-5xl leading-tight text-brand-primary tracking-tight">{product.name}</h2>
-            <div className="flex flex-wrap gap-x-8 gap-y-4 pt-2">
-              <span className="flex items-center gap-2.5 text-[11px] font-black uppercase tracking-[0.2em] text-brand-primary/40">
-                <Clock className="w-4 h-4 text-gold shrink-0" /> 
-                Fixação 8h+
-              </span>
-              <span className="flex items-center gap-2.5 text-[11px] font-black uppercase tracking-[0.2em] text-gold/80">
-                <Zap className="w-4 h-4 shrink-0" /> 
-                Brand Collection
-              </span>
-            </div>
-          </div>
-
-          <div className="h-px bg-brand-primary/5 w-full"></div>
-
-          <p className="text-brand-primary/50 text-base md:text-lg leading-relaxed italic font-light max-w-md">
-            "{product.description}"
-          </p>
-
-          <div className="bg-brand-accent/30 p-8 rounded-[32px] space-y-6 border border-brand-primary/5">
-             <div className="flex flex-col">
-                {product.oldPrice && (
-                  <span className="text-xs line-through opacity-40 font-bold mb-1 text-brand-primary">
-                    De R$ {product.oldPrice}
-                  </span>
-                )}
-                <div className="flex items-end gap-1.5 text-brand-primary">
-                  <span className="text-sm mb-2 font-bold uppercase tracking-widest">Apenas R$</span>
-                  <span className="text-5xl font-black tracking-tighter">
-                    {product.price}
-                  </span>
+        <div className="w-full md:w-1/2 p-12 md:p-20 flex flex-col justify-center">
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="flex gap-1">
+                  {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-gold text-gold" />)}
                 </div>
-             </div>
-             
-             <ul className="space-y-3 pt-2">
-               <li className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-whatsapp font-bold">
-                 <CheckCircle2 className="w-4 h-4" />
-                 Frete Grátis para São Luís
-               </li>
-               <li className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-gold/80 font-bold">
-                 <Zap className="w-4 h-4" />
-                 Entrega Imediata hoje
-               </li>
-             </ul>
-          </div>
+                <span className="text-[10px] font-black text-gold uppercase tracking-[0.3em]">Qualidade Premium Garantida</span>
+              </div>
+              <h2 className="serif text-4xl md:text-5xl leading-[1.1] text-brand-primary tracking-tight text-balance">{product.name}</h2>
+              <div className="flex flex-wrap gap-x-10 gap-y-4 pt-2">
+                <span className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40">
+                  <Clock className="w-4 h-4 text-gold" /> 
+                  PROJEÇÃO MARCANTE
+                </span>
+                <span className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40">
+                  <Zap className="w-4 h-4 text-gold" /> 
+                  FIXAÇÃO ALTA
+                </span>
+              </div>
+            </div>
 
-          <div className="pt-4">
-            <a 
-              href={product.checkoutLink}
-              className="btn-cta bg-gold text-white hover:bg-gold-light group min-h-[72px]"
-            >
-              <ShoppingBag className="w-6 h-6 transition-transform group-hover:rotate-12" />
-              QUERO ESTE PERFUME AGORA
-            </a>
-            
-            <div className="mt-8 flex justify-center items-center gap-3 opacity-30">
-              <ShieldCheck className="w-5 h-5 text-gold" />
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-center">Pagamento Seguro em São Luís</span>
+            <div className="space-y-6">
+              <p className="text-brand-primary/60 text-lg md:text-xl leading-relaxed italic font-light serif text-balance">
+                "{product.description}"
+              </p>
+              
+              <div className="pt-6">
+                 <div className="flex flex-col">
+                    {product.oldPrice && (
+                      <span className="text-xs line-through opacity-30 font-bold mb-1 text-brand-primary">
+                        De R$ {product.oldPrice}
+                      </span>
+                    )}
+                    <div className="flex items-end gap-2 text-brand-primary">
+                      <span className="text-sm mb-2 font-bold uppercase tracking-[0.2em]">R$</span>
+                      <span className="text-6xl font-black tracking-tighter leading-none">
+                        {product.price}
+                      </span>
+                    </div>
+                 </div>
+                 
+                 <div className="flex flex-col gap-3 mt-8">
+                   <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-whatsapp">
+                     <CheckCircle2 className="w-4 h-4" />
+                     Frete Grátis e Entrega hoje em São Luís
+                   </div>
+                 </div>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <a 
+                href={product.checkoutLink}
+                onClick={trackIC}
+                className="btn-cta bg-brand-primary text-white hover:bg-gold transition-all min-h-[80px] text-sm"
+              >
+                <ShoppingBag className="w-6 h-6" />
+                ADQUIRIR AGORA
+              </a>
+              
+              <p className="mt-8 text-[9px] font-black uppercase tracking-[0.4em] text-brand-primary/20 text-center">
+                Pagamento 100% Seguro via Yampi
+              </p>
             </div>
           </div>
         </div>
@@ -399,36 +403,52 @@ const ProductModal = ({ product, isOpen, onClose }: { product: Product | null, i
 const Products = ({ onProductClick }: { onProductClick: (p: Product) => void }) => {
   const perfumes: Product[] = [
     { 
-      name: "Brand Collection 25ML — Delina", 
-      price: "82,90", 
+      name: "Inspiração Delina Parfums de Marly | Miniatura", 
+      price: "79,90", 
       oldPrice: "119,90",
       image: "https://i.ibb.co/5xJ9C6cw/1-Perfume.png",
-      description: "Miniatura do Parfums de Marly Delina. Um buquê floral marcante e luxuoso que exala feminilidade e poder.",
+      description: "Uma obra-prima da perfumaria de nicho. Este bouquet floral abre com a vivacidade do ruibarbo e lichia, evoluindo para uma rosa turca aveludada que exala realeza e um magnetismo irresistível.",
       checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/93ZL576JZQ"
     },
     { 
-      name: "Brand Collection 25ML — Libre", 
-      price: "82,90", 
+      name: "Inspiração Libre Yves Saint Laurent | Miniatura", 
+      price: "84,90", 
       oldPrice: "109,90",
       image: "https://i.ibb.co/1JB933b9/Libre-png.png",
-      description: "A essência da liberdade em um frasco. Sofisticado e audacioso, combina notas florais com um toque de sensualidade.",
+      description: "A celebração máxima da liberdade. Um equilíbrio audacioso entre a lavanda francesa e a flor de laranjeira marroquina, criando uma aura sofisticada que transita do poder executivo à sedução noturna.",
       checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/KR54MWKMDV"
     },
     { 
-      name: "Brand Collection 25ML — Good Girl", 
+      name: "Inspiração Good Girl Carolina Herrera | Miniatura", 
       price: "82,90", 
       oldPrice: "99,90",
       image: "https://i.ibb.co/jZHqyW84/Carolina-png.png",
-      description: "Ousado e misterioso. Uma fragrância poderosa que captura a dualidade da mulher moderna, entre o doce e o intenso.",
+      description: "O perfume da mulher que não conhece limites. O duelo entre as notas doces do jasmim e a intensidade sombria do cacau e fava tonka. Uma fragrância viciante que captura a dualidade feminina.",
       checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/2F616G1WA0"
     },
     { 
-      name: "Brand Collection 25ML — Si Passione", 
-      price: "82,90", 
+      name: "Inspiração Si Passione Armani | Miniatura", 
+      price: "79,90", 
       oldPrice: "94,90",
       image: "https://i.ibb.co/tTTpg3rK/Passione-png.png",
-      description: "Uma fragrância intensa e intransigente. Ousada e radiante, para a mulher que se atreve a dizer sim.",
+      description: "Um hino à paixão vibrante. Com notas de néctar de groselha preta e acordes florais de rosa e jasmim, é uma fragrância radiante e audaciosa, ideal para quem vive com intensidade e elegância.",
       checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/V2U67Y9KA0"
+    },
+    { 
+      name: "Inspiração Miss Dior EDP | Miniatura", 
+      price: "84,90", 
+      oldPrice: "94,90",
+      image: "https://i.ibb.co/s9sKtBHK/Miss-Dior.png",
+      description: "O novo despertar do amor. Uma explosão floral colorida com notas de peônia branca e íris, envoltas por um almíscar cremoso. É o equilíbrio perfeito entre o romantismo clássico e a modernidade.",
+      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/93ZL576JZQ"
+    },
+    { 
+      name: "Inspiração Jean Paul Gaultier Classique | Miniatura", 
+      price: "83,70", 
+      oldPrice: "97,90",
+      image: "https://i.ibb.co/bMC2Jm7p/JPG-Classique.png",
+      description: "A essência icônica da feminilidade. Uma combinação inesquecível de gengibre, flor de laranjeira e baunilha, que cria um rastro afrodisíaco e atemporal, celebrando a arte da sedução.",
+      checkoutLink: "https://perfumaria-liora.pay.yampi.com.br/r/93ZL576JZQ"
     }
   ];
 
@@ -496,7 +516,7 @@ const Products = ({ onProductClick }: { onProductClick: (p: Product) => void }) 
   );
 };
 
-const Offers = () => (
+const Offers = ({ trackIC }: { trackIC: () => void }) => (
   <section id="kits-exclusivos" className="section-padding px-6 bg-[#0a0a0a] text-brand-accent relative overflow-hidden content-lazy">
     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(197,160,89,0.08),transparent_75%)] opacity-40"></div>
     <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 blur-[130px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
@@ -648,6 +668,7 @@ const Offers = () => (
             <div className="mt-14">
               <a 
                 href={offer.checkout}
+                onClick={trackIC}
                 className={`btn-cta 
                   ${offer.featured 
                     ? 'bg-brand-primary text-white hover:bg-gold hover:shadow-gold/40' 
@@ -727,7 +748,7 @@ const Benefits = () => (
                   element.scrollIntoView({ behavior: "smooth" });
                 }
               }}
-              className="btn-cta bg-brand-primary text-white hover:bg-gold group w-full"
+              className="btn-cta bg-brand-primary text-white hover:bg-gold group !w-[268px] !text-[8px] !pl-0 !pr-[12px]"
             >
               <ShoppingBag className="w-5 h-5 text-gold transition-transform group-hover:rotate-12" />
               COMPRAR AGORA COM FRETE GRÁTIS
@@ -849,6 +870,33 @@ const Footer = () => (
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
+  // Initialize UTMify Tracking
+  useEffect(() => {
+    // Set Pixel ID
+    window.pixelId = "69e1626d526b1625aa84b749";
+
+    // Inject Script if not present
+    if (!document.getElementById('utmify-pixel-script')) {
+      const script = document.createElement("script");
+      script.id = 'utmify-pixel-script';
+      script.async = true;
+      script.defer = true;
+      script.src = "https://cdn.utmify.com.br/scripts/pixel/pixel.js";
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  const trackIC = () => {
+    if (window.utmify && typeof window.utmify.track === 'function') {
+      window.utmify.track('InitiateCheckout');
+    } else {
+      // Fallback: try to push to dataLayer or just a custom event if utmify isn't ready
+      // UTMify's pixel.js usually auto-tracks clicks to common checkouts, 
+      // but manual call is safer.
+      console.log('UTMify not initialized, but IC triggered');
+    }
+  };
+
   const scrollToOffers = (e: React.MouseEvent) => {
     e.preventDefault();
     const element = document.getElementById("kits-exclusivos");
@@ -873,7 +921,7 @@ export default function App() {
       <BeliefBreaker />
       <TestimonialsVideo />
       <Products onProductClick={(p) => setSelectedProduct(p)} />
-      <Offers />
+      <Offers trackIC={trackIC} />
       <Benefits />
       <FAQ />
       
@@ -881,6 +929,7 @@ export default function App() {
         product={selectedProduct} 
         isOpen={!!selectedProduct} 
         onClose={() => setSelectedProduct(null)} 
+        trackIC={trackIC}
       />
       
       {/* Floating Checkout */}

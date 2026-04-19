@@ -18,91 +18,48 @@
 
     <!-- UTMify Script -->
     <script>
-      // Ultra-robust fix for "Converting circular structure to JSON" and Cross-Origin frame errors
+      // Fix for "Converting circular structure to JSON" and "Failed to fetch"
+      // silences tracking script errors caused by AdBlock or React circular refs.
       (function() {
-        // Silence "Failed to fetch" for tracking domains to avoid console pollution
+        // Intercept Fetch to avoid "Failed to fetch" console red noise for tracking
         const originalFetch = window.fetch;
         window.fetch = function(...args) {
           const url = typeof args[0] === 'string' ? args[0] : (args[0] instanceof URL ? args[0].href : (args[0] && args[0].url));
           return originalFetch.apply(this, args).catch(err => {
-            if (err.message === 'Failed to fetch' && (
+            const isTracking = url && (
               url.includes('utmify') || 
               url.includes('facebook') || 
-              url.includes('vimeo') ||
-              url.includes('google-analytics')
-            )) {
-              console.warn('Blocked tracking fetch:', url);
-              // Return a mock response that won't break .json() parsing
-              return new Response('{}', { 
-                status: 200, 
-                statusText: 'OK',
-                headers: { 'Content-Type': 'application/json' }
-              });
+              url.includes('google-analytics') ||
+              url.includes('vimeo')
+            );
+            if (err.message === 'Failed to fetch' && isTracking) {
+              console.warn('Silent Block/Failure for tracking:', url);
+              return new Response('{}', { status: 200, statusText: 'OK', headers: { 'Content-Type': 'application/json' } });
             }
             throw err;
           });
         };
 
-        // Log network failures to help diagnose "Failed to fetch"
-        window.addEventListener('unhandledrejection', event => {
-          if (event.reason && event.reason.name === 'TypeError' && event.reason.message === 'Failed to fetch') {
-            console.warn('Silent Fetch Failure (likely AdBlock or Tracking Block):', event.reason);
-          }
-        });
-
         const originalStringify = JSON.stringify;
         JSON.stringify = function(value, replacer, space) {
+          const cache = new Set();
           try {
-            const cache = new Set();
             return originalStringify(value, (key, val) => {
-              try {
-                // If it looks like a Window object, stop here to avoid cross-origin checks
-                if (val && typeof val === 'object' && (val.window === val || val.self === val)) {
-                  return '[Window]';
+              if (val && typeof val === 'object') {
+                if (cache.has(val)) return '[Circular]';
+                if (val instanceof Node || (val.constructor && val.constructor.name.includes('HTML'))) {
+                  return '[DOMElement]';
                 }
-
-                if (typeof val === 'object' && val !== null) {
-                  if (cache.has(val)) return '[Circular]';
-                  cache.add(val);
-                }
-                return replacer ? replacer(key, val) : val;
-              } catch (e) {
-                // Catch any cross-origin or access errors on individual properties
-                return '[Restricted]';
+                cache.add(val);
               }
+              return replacer ? replacer(key, val) : val;
             }, space);
           } catch (err) {
-            // Fallback if the root object or internal logic throws before/during stringification
             return '"[Serialization Error]"';
           }
         };
-
-        const originalParse = JSON.parse;
-        JSON.parse = function(text, reviver) {
-          if (typeof text === 'string' && text.trim() === "") {
-            return {}; // Return empty object for empty strings to avoid "Unexpected end of input"
-          }
-          try {
-            return originalParse(text, reviver);
-          } catch (e) {
-            // If it's a tracking error or malformed from external scripts, don't crash the app
-            if (e.message.includes('Unexpected end of input') || e.message.includes('Unexpected token')) {
-              console.warn('Silent JSON.parse failure:', text);
-              return {};
-            }
-            throw e;
-          }
-        };
       })();
-
-      window.pixelId = "69e1626d526b1625aa84b749";
-      var a = document.createElement("script");
-      a.setAttribute("async", "");
-      a.setAttribute("defer", "");
-      a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
-      document.head.appendChild(a);
     </script>
-
     <script
       src="https://cdn.utmify.com.br/scripts/utms/latest.js"
       data-utmify-prevent-xcod-sck

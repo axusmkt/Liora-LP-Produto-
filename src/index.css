@@ -84,7 +84,7 @@
     @apply inline-flex items-center justify-center gap-4 transition-all duration-300;
     @apply uppercase tracking-[0.25em] font-black text-[10px] md:text-[12px];
     @apply h-[56px] md:h-[68px] px-8 py-4 md:px-14 md:py-6;
-    @apply rounded-[16px] md:rounded-full shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98];
+    @apply rounded-[16px] shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98];
     @apply text-center leading-none;
     white-space: nowrap;
     width: fit-content;
@@ -95,9 +95,9 @@
   /* Full width and optimized height on smaller screens */
   @media (max-width: 768px) {
     .btn-cta {
-      @apply w-full min-w-0 h-[60px] text-[11px] rounded-[14px];
-      white-space: normal;
-      padding: 0 1.5rem;
+      @apply w-full min-w-0 h-[60px] text-[10px] rounded-[14px];
+      white-space: nowrap;
+      padding: 0 1rem;
     }
   }
 }
