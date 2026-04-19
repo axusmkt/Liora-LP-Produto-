@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+  
+  --color-brand-primary: #111111;
+  --color-brand-accent: #f9f7f4;
+  --color-gold: #c5a059;
+  --color-gold-light: #e2d1b3;
+  --color-whatsapp: #25D366;
+  --color-whatsapp-dark: #128C7E;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Improved hierarchy: smaller on mobile, scaling up */
+    @apply text-[15px] sm:text-[16px] md:text-[18px];
+  }
+  body {
+    @apply bg-white text-brand-primary font-sans antialiased selection:bg-gold/20 select-none md:select-auto;
+    line-height: 1.6;
+    /* Prevent overflow on small screens */
+    overflow-x: hidden;
+    width: 100%;
+  }
+  h1 {
+    @apply text-4xl sm:text-5xl md:text-8xl;
+    line-height: 1.1;
+    @apply tracking-tighter text-balance;
+  }
+  h2 {
+    @apply text-3xl sm:text-4xl md:text-6xl;
+    line-height: 1.2;
+    @apply tracking-tight text-balance;
+  }
+  h3, h4, .serif {
+    line-height: 1.3;
+    @apply tracking-tight text-balance;
+  }
+}
+
+@layer utilities {
+  /* Section Padding Refinement for better Mobile UX */
+  .section-padding {
+    @apply py-16 md:py-32 lg:py-40;
+  }
+
+  /* Standard constrained text block for maximum readability */
+  .standard-text {
+    @apply max-w-[92%] md:max-w-[600px] mx-auto;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    line-height: 1.6;
+  }
+  
+  .scrollbar-hide {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .content-lazy {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 1000px;
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+}
+
+@layer components {
+  /* Standard CTA Button: Optimized for Mobile High-Conversion */
+  .btn-cta {
+    @apply inline-flex items-center justify-center gap-4 transition-all duration-300;
+    @apply uppercase tracking-[0.25em] font-black text-[10px] md:text-[12px];
+    @apply h-[56px] md:h-[68px] px-8 py-4 md:px-14 md:py-6;
+    @apply rounded-[16px] md:rounded-full shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98];
+    @apply text-center leading-none;
+    white-space: nowrap;
+    width: fit-content;
+    min-width: 280px;
+    max-width: 100%;
+  }
+
+  /* Full width and optimized height on smaller screens */
+  @media (max-width: 768px) {
+    .btn-cta {
+      @apply w-full min-w-0 h-[60px] text-[11px] rounded-[14px];
+      white-space: normal;
+      padding: 0 1.5rem;
+    }
+  }
+}
+
+.serif {
+  @apply font-serif;
+}
